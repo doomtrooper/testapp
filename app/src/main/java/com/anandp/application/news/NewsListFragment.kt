@@ -1,10 +1,11 @@
 package com.anandp.application.news
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anandp.application.App
 import com.anandp.application.R
@@ -19,16 +20,18 @@ import kotlinx.android.synthetic.main.news_list_fragment.*
 import javax.inject.Inject
 
 
+
+
 class NewsListFragment: DaggerFragment(), NewsListUi {
 
-    @Inject
-    lateinit var viewManager: LinearLayoutManager
     @Inject
     lateinit var app: App
     @Inject lateinit var controller: NewsListController
     @Inject
     lateinit var viewAdapter: NewsAdapter
     lateinit var disposable: Disposable
+    lateinit var listener: RecyclerViewClickListener
+
 
     override fun loadData(news: List<News>) {
         if (viewAdapter.news.size == 0) {
@@ -36,11 +39,6 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
             progress.visibility = View.GONE
             recycler_view.visibility = View.VISIBLE
             viewAdapter.news = news.toMutableList()
-            recycler_view.apply {
-                setHasFixedSize(true)
-                layoutManager = viewManager
-                adapter = viewAdapter
-            }
         } else {
             viewAdapter.news.addAll(news.toMutableList())
             viewAdapter.notifyDataSetChanged()
@@ -55,8 +53,7 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val layout = inflater.inflate(R.layout.news_list_fragment, container, false)
-        return layout
+        return inflater.inflate(R.layout.news_list_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,16 +64,36 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
                 retry.visibility = View.GONE
                 NewsListScreenCreateEvent()
             }
+        listener = object : RecyclerViewClickListener{
+            override fun onClick(position: Int) {
+                val bundle = bundleOf(
+                    "url" to viewAdapter.news[position].url
+                )
+                findNavController().navigate(R.id.news_to_details, bundle)
+            }
+        }
+        recycler_view.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(app)
+            adapter = viewAdapter
+        }
+        viewAdapter.listener = listener
         disposable =  Observable.merge(Observable.just(NewsListScreenCreateEvent()), clicks)
             .observeOn(Schedulers.io())
             .compose(controller)
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ it.render(this) }) { Log.d("NewsListFragment", it.message) }
+            .subscribe({ it.render(this) }) { throw it }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        viewAdapter.news.clear()
         disposable.dispose()
+    }
+
+    interface RecyclerViewClickListener {
+
+        fun onClick(position: Int)
     }
 
 }

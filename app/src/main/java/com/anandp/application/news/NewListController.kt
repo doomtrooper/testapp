@@ -10,6 +10,7 @@ import com.anandp.application.persistance.NewsDao
 import io.reactivex.Observable
 import io.reactivex.ObservableSource
 import io.reactivex.ObservableTransformer
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class NewsListController @Inject constructor(val api: NewsApiService, val dao: NewsDao) :
@@ -31,6 +32,7 @@ class NewsListController @Inject constructor(val api: NewsApiService, val dao: N
                 api.getNews("in", API_KEY)
                     .onErrorReturnItem(NewsResponse())
             }
+            .observeOn(Schedulers.newThread())
             .map { dao.insert(it.articles) }
             .map { dao.getAllNews() }
 

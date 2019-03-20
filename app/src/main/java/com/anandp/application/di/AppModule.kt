@@ -3,7 +3,6 @@ package com.anandp.application.di
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.anandp.application.App
 import com.anandp.application.api.NewsApiService
@@ -89,8 +88,4 @@ class AppModule {
     @Provides
     @Singleton
     fun providesNewsRepo(db: NewsDatabase): NewsDao = db.getRepoDao()
-
-    @Provides
-    @Singleton
-    fun providesLayoutManager(app: App): LinearLayoutManager = LinearLayoutManager(app)
 }

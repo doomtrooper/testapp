@@ -8,5 +8,15 @@
             android:id="@+id/root"
             android:name="com.anandp.application.news.NewsListFragment"
             android:label="Root"
-            tools:layout="@layout/news_list_fragment"/>
+            tools:layout="@layout/news_list_fragment">
+        <action
+            android:id="@+id/news_to_details"
+            app:destination="@+id/details" />
+
+    </fragment>
+    <fragment
+            android:id="@+id/details"
+            android:name="com.anandp.application.newsdetails.NewsDetailsFragment"
+            android:label="News Details"
+            tools:layout="@layout/fragment_news_details" />
 </navigation>

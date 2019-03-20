@@ -1,18 +1,3 @@
-/*
- * Copyright 2018 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package com.anandp.application.news
 
@@ -32,6 +17,7 @@ import javax.inject.Inject
 class NewsAdapter @Inject constructor(diffCallback: NewsDiffCallback, val picasso: Picasso): ListAdapter<News, NewsAdapter.ViewHolder>(diffCallback) {
 
     var news = mutableListOf<News>()
+    lateinit var listener: NewsListFragment.RecyclerViewClickListener
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val news = news[position]
@@ -42,12 +28,14 @@ class NewsAdapter @Inject constructor(diffCallback: NewsDiffCallback, val picass
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val row = LayoutInflater.from(parent.context).inflate(R.layout.news_row_item, parent, false)
-        return ViewHolder(row)
+        return ViewHolder(row).listen { listener.onClick(it) }
     }
 
     override fun getItemCount() = news.size
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
+    class ViewHolder(
+        view: View
+    ) : RecyclerView.ViewHolder(view)
 }
 
 class NewsDiffCallback @Inject constructor() : DiffUtil.ItemCallback<News>() {
@@ -59,4 +47,11 @@ class NewsDiffCallback @Inject constructor() : DiffUtil.ItemCallback<News>() {
     override fun areContentsTheSame(oldItem: News, newItem: News): Boolean {
         return oldItem == newItem
     }
+}
+
+fun <T : RecyclerView.ViewHolder> T.listen(event: (position: Int) -> Unit): T {
+    itemView.setOnClickListener {
+        event.invoke(adapterPosition)
+    }
+    return this
 }
