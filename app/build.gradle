@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.anandp.application"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+ext.versions = [
+        supportLibrary : '28.0.0',
+        dagger         : '2.11',
+        butterknife    : '8.6.0',
+        autovalue      : '1.4.1',
+        autovalueMoshi : '0.4.3',
+        okhttp         : '3.8.0',
+        retrofit       : '2.3.0',
+        mockito        : '2.7.22',
+        playservices   : '11.0.1',
+        archRoomVersion: '1.0.0-alpha1',
+        lombok         : '1.16.1',
+        nav            : '1.0.0',
+        room            : '2.1.0-alpha04'
+]
+
+dependencies {
+    testImplementation "org.mockito:mockito-core:$versions.mockito"
+
+    androidTestImplementation "org.mockito:mockito-android:$versions.mockito"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    implementation "com.android.support:design:$versions.supportLibrary"
+    implementation "com.android.support:support-v4:$versions.supportLibrary"
+    testImplementation 'junit:junit:4.12'
+
+
+    implementation "android.arch.persistence.room:runtime:$versions.archRoomVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$versions.archRoomVersion"
+
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.1'
+    implementation 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
+    implementation 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.2.0'
+
+    implementation 'com.google.dagger:dagger-android:2.19'
+    implementation 'com.google.dagger:dagger-android-support:2.19' // if you use the support libraries
+    kapt 'com.google.dagger:dagger-android-processor:2.19'
+    kapt 'com.google.dagger:dagger-compiler:2.19'
+
+    implementation 'javax.inject:javax.inject:1'
+    testImplementation 'junit:junit:4.12'
+    compileOnly 'javax.annotation:jsr250-api:1.0'
+
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$versions.retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$versions.retrofit"
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // Navigation
+    implementation "android.arch.navigation:navigation-fragment-ktx:$versions.nav"
+    implementation "android.arch.navigation:navigation-ui-ktx:$versions.nav"
+    kapt "android.arch.persistence.room:compiler:1.0.0"
+
+}
+repositories {
+    mavenCentral()
+}

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MyApplication</string>
+    <string name="no_data">No data, Please try again</string>
+</resources>
