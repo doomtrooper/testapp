@@ -22,11 +22,21 @@ class NewsListController @Inject constructor(val api: NewsApiService, val dao: N
             .replay()
             .refCount()
 
-        val localObs = replayedStream
+        val localObs = localStream(replayedStream)
+
+        val networkObs = networkStream(replayedStream)
+
+        return Observable.merge(localObs, networkObs)
+    }
+
+    private fun localStream(replayedStream: Observable<NewsListScreenCreateEvent>): Observable<UiChange<NewsListUi>> {
+        return replayedStream
             .map { dao.getAllNews() }
             .filter { it.isNotEmpty() }
             .flatMap { newsListReceived(it) }
+    }
 
+    private fun networkStream(replayedStream: Observable<NewsListScreenCreateEvent>): Observable<UiChange<NewsListUi>> {
         val networkObs = replayedStream
             .flatMap {
                 api.getNews("in", API_KEY)
@@ -44,8 +54,7 @@ class NewsListController @Inject constructor(val api: NewsApiService, val dao: N
         val withData = networkObs
             .filter { it.isNotEmpty() }
             .flatMap { newsListReceived(it) }
-
-        return Observable.merge(localObs, withData, noData)
+        return Observable.merge(noData, withData)
     }
 
     private fun newsListReceived(news: List<News>): ObservableSource<UiChange<NewsListUi>> {

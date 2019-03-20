@@ -40,7 +40,8 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
             recycler_view.visibility = View.VISIBLE
             viewAdapter.news = news.toMutableList()
         } else {
-            viewAdapter.news.addAll(news.toMutableList())
+            val filter = news.filter { !viewAdapter.news.contains(it) }
+            viewAdapter.news.addAll(filter)
             viewAdapter.notifyDataSetChanged()
         }
     }
