@@ -10,27 +10,39 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.anandp.application.App
 import com.anandp.application.R
 import com.anandp.application.model.News
+import com.anandp.application.news.NewsListEvent.RetryEvent
+import com.anandp.application.news.NewsListEvent.ScreenCreateEvent
 import com.jakewharton.rxbinding2.view.RxView
 import dagger.android.support.DaggerFragment
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.news_list_fragment.*
 import javax.inject.Inject
 
 
-
-
 class NewsListFragment: DaggerFragment(), NewsListUi {
+    override fun isLoading(boolean: Boolean) = if (boolean) progress.visibility = View.GONE else progress.visibility = View.GONE
+
+    override fun render(state: NewsListViewState) {
+        isLoading(state.isLoading)
+        if (state.news.isNotEmpty()) loadData(state.news)
+        if (state.news.isEmpty()) noData()
+        if (state.err!=null) noData()
+    }
+
+    override fun intent(): Observable<NewsListEvent> {
+        val clicks = RxView.clicks(retry)
+            .map { RetryEvent }
+        val observable = Observable.just<NewsListEvent>(ScreenCreateEvent)
+        return observable.mergeWith(clicks)
+    }
 
     @Inject
     lateinit var app: App
-    @Inject lateinit var controller: NewsListController
+    @Inject lateinit var controller: Composer
     @Inject
     lateinit var viewAdapter: NewsAdapter
-    lateinit var disposable: Disposable
-    lateinit var listener: RecyclerViewClickListener
+    private lateinit var listener: RecyclerViewClickListener
+    private lateinit var presenter: NewsListPresenter
 
 
     override fun loadData(news: List<News>) {
@@ -59,12 +71,7 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val clicks = RxView.clicks(retry)
-            .map {
-                progress.visibility = View.VISIBLE
-                retry.visibility = View.GONE
-                NewsListScreenCreateEvent()
-            }
+        presenter = NewsListPresenter(this, controller)
         listener = object : RecyclerViewClickListener{
             override fun onClick(position: Int) {
                 val bundle = bundleOf(
@@ -78,18 +85,14 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
             layoutManager = LinearLayoutManager(app)
             adapter = viewAdapter
         }
+        presenter.binds()
         viewAdapter.listener = listener
-        disposable =  Observable.merge(Observable.just(NewsListScreenCreateEvent()), clicks)
-            .observeOn(Schedulers.io())
-            .compose(controller)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ it.render(this) }) { throw it }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         viewAdapter.news.clear()
-        disposable.dispose()
+        presenter.dispose()
     }
 
     interface RecyclerViewClickListener {
