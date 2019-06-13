@@ -8,6 +8,7 @@ import com.anandp.application.App
 import com.anandp.application.api.NewsApiService
 import com.anandp.application.persistance.NewsDao
 import com.anandp.application.persistance.NewsDatabase
+import com.anandp.persistence.Config
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -28,6 +29,10 @@ class AppModule {
     @Provides
     @Singleton
     fun context(app: App): Context = app.applicationContext
+
+    @Provides
+    @Singleton
+    fun providesConfig() = Config(1)
 
 
     @Provides

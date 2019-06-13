@@ -1,6 +1,7 @@
 package com.anandp.application.news
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import com.anandp.application.R
 import com.anandp.application.model.News
 import com.anandp.application.news.NewsListEvent.RetryEvent
 import com.anandp.application.news.NewsListEvent.ScreenCreateEvent
+import com.anandp.persistence.ExpensiveObject
 import com.jakewharton.rxbinding2.view.RxView
 import dagger.android.support.DaggerFragment
 import io.reactivex.Observable
@@ -41,6 +43,8 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
     @Inject lateinit var controller: Composer
     @Inject
     lateinit var viewAdapter: NewsAdapter
+    @Inject
+    lateinit var obj: ExpensiveObject
     private lateinit var listener: RecyclerViewClickListener
     private lateinit var presenter: NewsListPresenter
 
@@ -71,6 +75,7 @@ class NewsListFragment: DaggerFragment(), NewsListUi {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("Dagger: ", obj.toString())
         presenter = NewsListPresenter(this, controller)
         listener = object : RecyclerViewClickListener{
             override fun onClick(position: Int) {

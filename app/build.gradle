@@ -86,6 +86,7 @@ dependencies {
     implementation "android.arch.navigation:navigation-ui-ktx:$versions.nav"
     kapt "android.arch.persistence.room:compiler:1.0.0"
     implementation 'androidx.core:core-ktx:1.0.0'
+    implementation project(':persistence')
 
 }
 repositories {
